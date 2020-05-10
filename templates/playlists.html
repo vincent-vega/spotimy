@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block container %}
+  <div>
+    <ul>
+      {% for item in playlists %}
+      <li>{{ item['name'] }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
