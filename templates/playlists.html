@@ -3,7 +3,7 @@
   <div>
     <ul>
       {% for item in playlists %}
-      <li>{{ item['name'] }}</li>
+        <li><a href="/show/{{ item['id'] }}">{{ item['name'] }}</a> <a href="/save/{{ item['id'] }}">save</a></li>
       {% endfor %}
     </ul>
   </div>

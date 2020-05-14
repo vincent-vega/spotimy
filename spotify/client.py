@@ -24,5 +24,14 @@ class Spotify:
     def list_playlists(access_token: str) -> dict:
         resp = requests.get(f'https://api.spotify.com/v1/me/playlists',
                             headers={'Authorization': f'Bearer {access_token}'})
+        # TODO pagination
         return resp.json() # TODO check response is json
 
+    @staticmethod
+    def list_track(access_token: str, playlist_id: str) -> dict:
+        resp = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}',
+                            headers={'Authorization': f'Bearer {access_token}'})
+        data = resp.json()
+        tracks = [ { 'artist': item['track']['artists'][0]['name'], 'title': item['track']['name'] } for item in data['tracks']['items'] ]
+        # TODO pagination, catch key errors, multiple artists
+        return tracks
