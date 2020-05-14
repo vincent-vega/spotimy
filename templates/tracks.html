@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block container %}
+  <div>
+    <ol>
+      {% for track in tracks %}
+        <li>{{ track['artist'] }} - {{ track['title'] }}</li>
+      {% endfor %}
+    </ol>
+    <a href="{{ url_for('login') }}">back</a>
+  </div>
+{% endblock %}
