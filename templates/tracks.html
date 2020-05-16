@@ -3,7 +3,7 @@
   <div>
     <ol>
       {% for track in tracks %}
-        <li>{{ track['artist'] }} - {{ track['title'] }}</li>
+        <li>{{ ', '.join(track['artists']) }} - {{ track['title'] }}</li>
       {% endfor %}
     </ol>
     <a href="{{ url_for('login') }}">back</a>

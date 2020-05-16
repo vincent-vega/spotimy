@@ -39,12 +39,12 @@ def spotify_callback():
                         authdata['expires_in'])
 
 @app.route('/save/<playlist_id>', methods=['GET'])
-def save_playlist(playlist_id):
+def save_playlist(playlist_id: str):
     # TODO
     return ''
 
 @app.route('/show/<playlist_id>', methods=['GET'])
-def show_playlist(playlist_id):
+def show_playlist(playlist_id: str):
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
     return render_template('tracks.html', tracks=Spotify.list_track(request.cookies.get('token'), playlist_id))

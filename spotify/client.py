@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from spotify.secrets import client_id, client_secret, redirect_uri
+from util.utils import highlight
 import base64
 import requests
 
@@ -28,10 +29,31 @@ class Spotify:
         return resp.json() # TODO check response is json
 
     @staticmethod
-    def list_track(access_token: str, playlist_id: str) -> dict:
+    def _get_tracks(tracks: dict) -> list:
+
+        def _process_item(item: dict) -> dict:
+            return { 'artists': [ artist['name'] for artist in item['artists'] ], 'title': item['name'] }
+
+        try:
+            return [ _process_item(item['track']) for item in tracks['items'] ]
+        except KeyError as e:
+            print(highlight(f'Missing key {e}', color='red', bold=True))
+        return []
+
+    @staticmethod
+    def list_track(access_token: str, playlist_id: str) -> list:
         resp = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}',
                             headers={'Authorization': f'Bearer {access_token}'})
         data = resp.json()
-        tracks = [ { 'artist': item['track']['artists'][0]['name'], 'title': item['track']['name'] } for item in data['tracks']['items'] ]
-        # TODO pagination, catch key errors, multiple artists
+        tracks = []
+        try:
+            data = data['tracks']
+            tracks.extend(Spotify._get_tracks(data))
+            while data['next']:
+                nxt = data['next']
+                resp = requests.get(f'{nxt}', headers={'Authorization': f'Bearer {access_token}'})
+                data = resp.json()
+                tracks.extend(Spotify._get_tracks(data))
+        except KeyError as e:
+            print(highlight(f'list_track: key {e} not found', color='red', bold=True))
         return tracks
