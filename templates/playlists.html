@@ -3,9 +3,10 @@
   <div>
     <ul>
       {% for item in playlists %}
+        {# <li><a href="/show/{{ item['id'] }}">{{ item['name'] }}</a> <a href="/save/{{ item['id'] }}/{{ item['name'].lower() }}">save</a></li> #}
         <li><a href="/show/{{ item['id'] }}">{{ item['name'] }}</a> <a href="/save/{{ item['id'] }}">save</a></li>
       {% endfor %}
     </ul>
-    {# TODO save all #}
+    <a href="/saveall">save all</a>
   </div>
 {% endblock %}

@@ -32,6 +32,7 @@ class Spotify:
     def _get_tracks(tracks: dict) -> list:
 
         def _process_item(item: dict) -> dict:
+            # TODO track_id, album, url
             return { 'artists': [ artist['name'] for artist in item['artists'] ], 'title': item['name'] }
 
         try:
@@ -41,10 +42,11 @@ class Spotify:
         return []
 
     @staticmethod
-    def list_track(access_token: str, playlist_id: str) -> list:
+    def list_track(access_token: str, playlist_id: str) -> (str, list):
         resp = requests.get(f'https://api.spotify.com/v1/playlists/{playlist_id}',
                             headers={'Authorization': f'Bearer {access_token}'})
         data = resp.json()
+        playlist_name = data['name']
         tracks = []
         try:
             data = data['tracks']
@@ -56,4 +58,4 @@ class Spotify:
                 tracks.extend(Spotify._get_tracks(data))
         except KeyError as e:
             print(highlight(f'list_track: key {e} not found', color='red', bold=True))
-        return tracks
+        return playlist_name, tracks
