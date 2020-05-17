@@ -2,10 +2,12 @@
 {% block container %}
   <div>
     <ol>
-      {% for track in tracks %}
-        <li>{{ ', '.join(track['artists']) }} - {{ track['title'] }}</li>
+      {% for track in playlist %}
+        <li>
+          <span> {{ ', '.join(track['artist']) }} </span> - <span> {{ track['name'] }} </span>
+        </li>
       {% endfor %}
     </ol>
-    <a href="{{ url_for('login') }}">back</a>
+    <a href="{{ url_for('show_library') }}">back</a>
   </div>
 {% endblock %}

@@ -27,6 +27,7 @@ def spotify_callback():
 def show_library():
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
+    # TODO corrupted token handling
     data = Spotify.list_playlists(request.cookies.get('token'))
     return render_template('playlists.html', playlists=data['items'])
 
@@ -35,8 +36,8 @@ def show_library():
 def save_playlist(playlist_id: str, file_name: str=None):
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
-    name, tracklist = Spotify.list_track(request.cookies.get('token'), playlist_id)
-    file_name = name.lower() if file_name is None else file_name
+    tracklist = Spotify.playlist_info(request.cookies.get('token'), playlist_id)
+    file_name = tracklist['name'].lower() if file_name is None else file_name
     resp = make_response(json.dumps(tracklist, separators=(',', ':')))
     resp.headers['Content-Disposition'] = f'attachment; filename={file_name}.json'
     resp.headers['Content-type'] = 'application/json'
@@ -47,9 +48,10 @@ def save_all():
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
     data = Spotify.list_playlists(request.cookies.get('token'))
-    library = [ Spotify.list_track(request.cookies.get('token'), p['id']) for p in data['items'] ]
+    library = [ Spotify.playlist_info(request.cookies.get('token'), p['id']) for p in data['items'] ]
+    library.extend([ Spotify.saved_tracks(request.cookies.get('token')) ])
     resp = make_response(json.dumps(library, separators=(',', ':')))
-    resp.headers['Content-Disposition'] = 'attachment; filename=sporimy.json'
+    resp.headers['Content-Disposition'] = 'attachment; filename=spotimy.json'
     resp.headers['Content-type'] = 'application/json'
     return resp
 
@@ -57,8 +59,27 @@ def save_all():
 def show_playlist(playlist_id: str):
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
-    name, tracklist = Spotify.list_track(request.cookies.get('token'), playlist_id)
-    return render_template('tracks.html', tracks=tracklist)
+    data = Spotify.playlist_info(request.cookies.get('token'), playlist_id)
+
+    def _get_track_info(track: dict) -> dict:
+        artist = [ artist['name'] for artist in track['track']['artists'] ]
+        return { 'artist': artist, 'name': track['track']['name'] }
+    tracklist = [ _get_track_info(track) for track in data['tracks']['items'] ]
+
+    return render_template('tracks.html', playlist=tracklist)
+
+@app.route('/liked', methods=['GET'])
+def show_liked():
+    if 'token' not in request.cookies:
+        return redirect(url_for('login'))
+    data = Spotify.saved_tracks(request.cookies.get('token'))
+
+    def _get_track_info(track: dict) -> dict:
+        artist = [ artist['name'] for artist in track['track']['artists'] ]
+        return { 'artist': artist, 'name': track['track']['name'] }
+
+    tracklist = [ _get_track_info(track) for track in data['items'] ]
+    return render_template('tracks.html', playlist=tracklist)
 
 def main():
     app.config.update(
