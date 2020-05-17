@@ -34,7 +34,7 @@ def show_library():
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
     # TODO corrupted token handling
-    data = Spotify.list_playlists(request.cookies.get('token'))
+    data = Spotify.playlists(request.cookies.get('token'))
     return render_template('library.html', playlists=data['items'])
 
 @app.route('/save/<playlist_id>', methods=['GET'])
@@ -63,7 +63,7 @@ def save_liked():
 def save_all():
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
-    data = Spotify.list_playlists(request.cookies.get('token'))
+    data = Spotify.playlists(request.cookies.get('token'))
     library = [ Spotify.playlist_info(request.cookies.get('token'), p['id']) for p in data['items'] ]
     library.extend([ Spotify.saved_tracks(request.cookies.get('token')) ])
     resp = make_response(json.dumps(library, separators=(',', ':')))
@@ -81,7 +81,12 @@ def show_playlist(playlist_id: str):
         artist = [ artist['name'] for artist in track['track']['artists'] ]
         return { 'artist': artist, 'name': track['track']['name'] }
 
-    return render_template('tracks.html', playlist=[ _get_track_info(track) for track in data['tracks']['items'] ])
+    try:
+        tracks = [ _get_track_info(track) for track in data['tracks']['items'] ]
+        return render_template('tracks.html', playlist=tracks)
+    except KeyError as e:
+        # TODO error handling
+        pass
 
 @app.route('/liked', methods=['GET'])
 def show_liked():
@@ -93,7 +98,12 @@ def show_liked():
         artist = [ artist['name'] for artist in track['track']['artists'] ]
         return { 'artist': artist, 'name': track['track']['name'] }
 
-    return render_template('tracks.html', playlist=[ _get_track_info(track) for track in data['items'] ])
+    try:
+        tracks = [ _get_track_info(track) for track in data['items'] ]
+        return render_template('tracks.html', playlist=tracks)
+    except KeyError as e:
+        # TODO error handling
+        pass
 
 def main():
     app.config.update(

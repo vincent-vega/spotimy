@@ -23,7 +23,7 @@ class Spotify:
         return resp.json()
 
     @staticmethod
-    def list_playlists(access_token: str) -> dict:
+    def playlists(access_token: str) -> dict:
         resp = requests.get(f'https://api.spotify.com/v1/me/playlists',
                             headers={'Authorization': f'Bearer {access_token}'})
         # TODO check response is json
@@ -36,7 +36,7 @@ class Spotify:
                 data = resp.json()
                 playlists['items'].extend(data['items'])
         except KeyError as e:
-            print(highlight(f'list_playlists: key {e} not found', color='red', bold=True))
+            print(highlight(f'playlists: key {e} not found', color='red', bold=True))
         return playlists
 
     @staticmethod
