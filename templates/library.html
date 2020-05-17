@@ -5,7 +5,7 @@
       {% for item in playlists %}
         <li><a href="/show/{{ item['id'] }}">{{ item['name'] }}</a> <a href="/save/{{ item['id'] }}">save</a></li>
       {% endfor %}
-      <li><a href="/liked">Liked Songs</a> <a href="">save</a></li>
+      <li><a href="/liked">Liked Songs</a> <a href="/saveliked">save</a></li>
     </ul>
     <a href="/saveall">save all</a>
     {# <a href="/logout">logout</a> #}

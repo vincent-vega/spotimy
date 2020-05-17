@@ -49,6 +49,16 @@ def save_playlist(playlist_id: str, file_name: str=None):
     resp.headers['Content-type'] = 'application/json'
     return resp
 
+@app.route('/saveliked', methods=['GET'])
+def save_liked():
+    if 'token' not in request.cookies:
+        return redirect(url_for('login'))
+    tracklist = Spotify.saved_tracks(request.cookies.get('token'))
+    resp = make_response(json.dumps(tracklist, separators=(',', ':')))
+    resp.headers['Content-Disposition'] = f'attachment; filename=likedsongs.json'
+    resp.headers['Content-type'] = 'application/json'
+    return resp
+
 @app.route('/saveall', methods=['GET'])
 def save_all():
     if 'token' not in request.cookies:
