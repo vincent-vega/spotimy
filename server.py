@@ -15,6 +15,12 @@ def login():
     print('cookie not found, redirect to spotify...')
     return redirect(Spotify.get_authorize_uri())
 
+@app.route('/logout', methods=['GET'])
+def logout():
+    resp = make_response('')
+    resp.set_cookie('token', '', expires=0)
+    return resp
+
 @app.route('/spotifycb', methods=['GET'])
 def spotify_callback():
     authdata = Spotify.token(request.args.get('code'))
@@ -29,7 +35,7 @@ def show_library():
         return redirect(url_for('login'))
     # TODO corrupted token handling
     data = Spotify.list_playlists(request.cookies.get('token'))
-    return render_template('playlists.html', playlists=data['items'])
+    return render_template('library.html', playlists=data['items'])
 
 @app.route('/save/<playlist_id>', methods=['GET'])
 @app.route('/save/<playlist_id>/<file_name>', methods=['GET'])
@@ -64,9 +70,8 @@ def show_playlist(playlist_id: str):
     def _get_track_info(track: dict) -> dict:
         artist = [ artist['name'] for artist in track['track']['artists'] ]
         return { 'artist': artist, 'name': track['track']['name'] }
-    tracklist = [ _get_track_info(track) for track in data['tracks']['items'] ]
 
-    return render_template('tracks.html', playlist=tracklist)
+    return render_template('tracks.html', playlist=[ _get_track_info(track) for track in data['tracks']['items'] ])
 
 @app.route('/liked', methods=['GET'])
 def show_liked():
@@ -78,8 +83,7 @@ def show_liked():
         artist = [ artist['name'] for artist in track['track']['artists'] ]
         return { 'artist': artist, 'name': track['track']['name'] }
 
-    tracklist = [ _get_track_info(track) for track in data['items'] ]
-    return render_template('tracks.html', playlist=tracklist)
+    return render_template('tracks.html', playlist=[ _get_track_info(track) for track in data['items'] ])
 
 def main():
     app.config.update(

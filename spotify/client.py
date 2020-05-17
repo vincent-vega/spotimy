@@ -10,7 +10,8 @@ class Spotify:
 
     @staticmethod
     def get_authorize_uri() -> str:
-        return f'https://accounts.spotify.com/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope=playlist-read-private%20user-library-read'
+        scope = '%20'.join([ 'playlist-read-private', 'user-library-read' ])
+        return f'https://accounts.spotify.com/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope={scope}'
 
     @staticmethod
     def token(code: str) -> dict:
@@ -25,9 +26,18 @@ class Spotify:
     def list_playlists(access_token: str) -> dict:
         resp = requests.get(f'https://api.spotify.com/v1/me/playlists',
                             headers={'Authorization': f'Bearer {access_token}'})
-        # TODO pagination
-        # TODO liked songs
-        return resp.json() # TODO check response is json
+        # TODO check response is json
+        playlists = resp.json()
+        try:
+            data = resp.json()
+            while data['next']:
+                nxt = data['next']
+                resp = requests.get(f'{nxt}', headers={'Authorization': f'Bearer {access_token}'})
+                data = resp.json()
+                playlists['items'].extend(data['items'])
+        except KeyError as e:
+            print(highlight(f'list_playlists: key {e} not found', color='red', bold=True))
+        return playlists
 
     @staticmethod
     def playlist_info(access_token: str, playlist_id: str) -> dict:
@@ -50,7 +60,6 @@ class Spotify:
         resp = requests.get(f'https://api.spotify.com/v1/me/tracks',
                             headers={'Authorization': f'Bearer {access_token}'})
         tracks = resp.json()
-        # TODO pagination
         try:
             data = resp.json()
             while data['next']:
