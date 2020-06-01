@@ -71,15 +71,15 @@ def save_all():
     resp.headers['Content-type'] = 'application/json'
     return resp
 
+def _get_track_info(track: dict) -> dict:
+    artist = [ artist['name'] for artist in track['track']['artists'] ]
+    return { 'artist': artist, 'name': track['track']['name'] }
+
 @app.route('/show/<playlist_id>', methods=['GET'])
 def show_playlist(playlist_id: str):
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
     data = Spotify.playlist_info(request.cookies.get('token'), playlist_id)
-
-    def _get_track_info(track: dict) -> dict:
-        artist = [ artist['name'] for artist in track['track']['artists'] ]
-        return { 'artist': artist, 'name': track['track']['name'] }
 
     try:
         tracks = [ _get_track_info(track) for track in data['tracks']['items'] ]
@@ -93,10 +93,6 @@ def show_liked():
     if 'token' not in request.cookies:
         return redirect(url_for('login'))
     data = Spotify.saved_tracks(request.cookies.get('token'))
-
-    def _get_track_info(track: dict) -> dict:
-        artist = [ artist['name'] for artist in track['track']['artists'] ]
-        return { 'artist': artist, 'name': track['track']['name'] }
 
     try:
         tracks = [ _get_track_info(track) for track in data['items'] ]
